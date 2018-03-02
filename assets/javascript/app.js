@@ -42,6 +42,8 @@ $(document).ready(function () {
         validAnswer: "Dogs, thanksgiving and taking picture"
     }];
 
+    var gifArray = ["question1", "question2", "question3", "question4", "question5", "question6", "question7", "question8", "question9", "question10",];
+
     var currentQuestion;
     var correctAnswer;
     var incorrectAnswer;
@@ -72,8 +74,8 @@ $(document).ready(function () {
     function newGame() {
         $("#finalMessage").empty();
         $("#correctAnswers").empty();
-        $("incorrectAnswers").empty();
-        $("unAnswered").empty();
+        $("#incorrectAnswers").empty();
+        $("#unAnswered").empty();
         currentQuestion = 0;
         correctAnswer = 0;
         incorrectAnswer = 0;
@@ -86,52 +88,99 @@ $(document).ready(function () {
     function newQuestion() {
         $("#message").empty();
         $("#correctedAnswer").empty();
+        $("#gif").empty();
         answered = true;
 
 
-        var h1 = $("<h1>").text(friendsQuestion[currentQuestion].question);
-        $("#currentQuestion").append(h1);
+        $("#currentQuestion").html("Question #" + (currentQuestion+1)+ "/"+friendsQuestion.length);
+        $("#question").html("<h2>" + friendsQuestion[currentQuestion].question + "</h2>")
+        // var h1 = $("<h1>").text(friendsQuestion[currentQuestion++].question);
+        // $("#currentQuestion").append(h1);
         for (var i = 0; i < friendsQuestion[currentQuestion].answerList.length; i++) {
-            var radioBtn = $('<button>');
-            radioBtn.attr('id', "answer")
-            radioBtn.text(friendsQuestion[0].answerList[i]);
-            $("#answerList").append(radioBtn);
+            var choices = $("<div>");
+            choices.text(friendsQuestion[currentQuestion].answerList[i]);
+            choices.attr({"data-index": i});
+            choices.addClass("thisChoice");
+            $("#answerList").append(choices);
+            // var radioBtn = $('<button>');
+            // radioBtn.attr('id', "answer")
+            // radioBtn.text(friendsQuestion[0].answerList[i]);
+            // $("#answerList").append(radioBtn);
         }
-        $("#answerList").on("click", "#answer", function () {
+        countdown();
+        //  clicking an answer will pause the time and setup answerPafe
+        $(".thisChoice").on("click", function () {
                 userSelect = $(this).text();
+                clearInterval(time);
                 answerPage();
             })
         };
 
 
+        function countdown(){
+            seconds = 15;
+            $("#timeLeft").html("<h3>Time Remaining: " + seconds + "</h3>");
+            answered = true;
+            // set timer to go down
+            time = setInterval(showCountdown, 1000);
+        }
+
+        function showCountdown(){
+            seconds--;
+            $("#timeLeft").html("<h3>Time Ramining: "+ seconds + "</h3>" );
+            if (seconds < 1) {
+                clearInterval(time);
+                answered = false;
+                answerPage();
+            }
+        }
 
 
         function answerPage() {
-            $("currentQuestion").empty();
-            $("#answer").empty();
             $("#currentQuestion").empty();
+            $("#answerList").empty();
+            $("#answer").empty();
             answered = true;
 
             var rightAnswerText = friendsQuestion[currentQuestion].validAnswer;
-            if (userSelect === rightAnswerText && answered == true) {
+            $("#gif").html('<img src="assets/images/'+ gifArray[currentQuestion] + '.gif" width = "400px">');
+            if ((userSelect === rightAnswerText && answered == true) && (answered == true)) {
                 correctAnswer++;
                 $("#message").html(messages.correct);
-                $("#currentQuestion").empty();
-                newquestion();
-            } else if (userSelect !== friendsQuestion[currentQuestion].validAnswer && answered == true) {
+            } else if ((userSelect !== friendsQuestion[currentQuestion].validAnswer) && (answered == true)) {
                 incorrectAnswer++;
                 $("#message").html(messages.incorrect);
+                $("#correctedAnswer").html("The correct Answer was: "+ rightAnswerText);
             } else {
                 unAnswered++;
                 $("#message").html(messages.endTime);
+                $("#correctedAnswer").html("The correct Answer was: "+ rightAnswerText);
                 answered = true;
             }
             if (currentQuestion == (friendsQuestion.length-1)){
-                
+                setTimeout(scoreboard, 5000);
+            } else {
+                currentQuestion++;
+                setTimeout(newQuestion, 5000);
             }
 
         };
 
+
+    function scoreboard(){
+        $("#timeleft").empty();
+        $("#message").empty();
+        $("#correctedAnswer").empty();
+        $("#gif").empty();
+
+        $("#finalMessage").html(message.finished);
+        $("#correctAnswers").html("Correct Answers: " + correctAnswer);
+        $("#incorrectAnswers").html("Incorrect Answers: " + incorrectAnswer);
+        $("#unAnswered").html("Unanswered: " + unAnswered);
+        $("#startOverBtn").addClass("reset");
+        $("#startOverBtn").show();
+        $("#startOverBtn").html("Start Over");
+    }
 
 
 
